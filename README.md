@@ -1,50 +1,91 @@
-# Welcome to your Expo app 👋
+# MentorMentee App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native Expo app for a mentor-mentee platform with role-based authentication using Appwrite. Supports Students, Teachers, and College Admins.
 
-## Get started
+## Overview
 
-1. Install dependencies
+This app uses Expo Router for file-based navigation, Appwrite for backend authentication, and role-based access control. Users sign up with roles (student, teacher, college), log in, and are directed to role-specific screens.
 
-   ```bash
-   npm install
-   ```
+## Appwrite Integration
 
-2. Start the app
+Appwrite handles user authentication via the Account service.
 
-   ```bash
-   npx expo start
-   ```
+### Key Functions in `lib/Appwrite.js`
 
-In the output, you'll find options to open the app in a
+- **Client Setup**: Configures Appwrite client with endpoint, project ID, and platform from environment variables (`EXPO_PUBLIC_APPWRITE_ENDPOINT`, `EXPO_PUBLIC_APPWRITE_PROJECT_ID`, `EXPO_PUBLIC_APPWRITE_PLATFORM`).
+- **Account Instance**: Exports `account` for authentication operations.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Authentication Operations in `context/AuthContext.js`
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **fetchUser()**: Retrieves current session and user preferences (role, name) on app load.
+- **signup(email, password, role, name)**: Creates user account, logs in, and sets preferences.
+- **login(email, password)**: Creates email-password session and fetches user data.
+- **logout()**: Deletes current session and resets state.
 
-## Get a fresh project
+User preferences store role and name for role-based navigation.
 
-When you're ready, run:
+## AuthGate Navigation
 
-```bash
-npm run reset-project
-```
+`AuthGate/AuthGate.jsx` manages initial navigation based on auth state.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Logic
 
-## Learn more
+- Checks `user`, `role`, and `loading` from `AuthContext`.
+- If not loading:
+  - No user: Navigate to `LogIn`.
+  - User exists: Route based on role:
+    - `college` → `(college)/CollegeHome`
+    - `teacher` → `(teacher)/TeacherHome`
+    - `student` → `(student)/StudentHome`
+    - Invalid role → `LogIn`
+- Renders `null` (invisible component).
 
-To learn more about developing your project with Expo, look at the following resources:
+Triggers on mount and state changes.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Routes and Navigation
 
-## Join the community
+Uses Expo Router with file-based routing. Root layout (`app/_layout.jsx`) wraps `AuthProvider` and `Slot`.
 
-Join our community of developers creating universal apps.
+### Route Structure
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Root (`app/index.jsx`)**: Renders `AuthGate` for initial routing.
+- **Auth Screens**:
+  - `app/LogIn.jsx`: Login form, calls `login()` on submit.
+  - `app/SignUp.jsx`: Signup form with role selection (Student, Teacher, College), calls `signup()` on submit.
+- **Role-Based Layouts** (using Tabs):
+  - `app/(student)/_layout.jsx`: Tabs for `StudentHome` and `StudentProfile`.
+  - `app/(teacher)/_layout.jsx`: Tabs for `TeacherHome` and `TeacherProfile`.
+  - `app/(college)/_layout.jsx`: Tabs for `CollegeHome` and `CollegeProfile`.
+- **Screens**:
+  - **Student**: `StudentHome` (welcome), `StudentProfile` (user info).
+  - **Teacher**: `TeacherHome` (welcome), `TeacherProfile` (user info).
+  - **College**: `CollegeHome` (welcome), `CollegeProfile` (user info).
+- All profile screens display name, email, role, and logout button.
+
+### Navigation Flow
+
+1. App starts at `/` (index), renders AuthGate.
+2. AuthGate redirects to login or role home.
+3. Post-login/signup, manual redirect to role home.
+4. Within roles, tab navigation between home and profile.
+5. Logout redirects to `LogIn`.
+
+## Environment Variables
+
+Set in `.env` or Expo config:
+
+- `EXPO_PUBLIC_APPWRITE_ENDPOINT`
+- `EXPO_PUBLIC_APPWRITE_PROJECT_ID`
+- `EXPO_PUBLIC_APPWRITE_PLATFORM`
+
+## Get Started
+
+1. Install dependencies: `npm install`
+2. Start app: `npx expo start`
+3. Open in emulator, simulator, or Expo Go.
+
+## Learn More
+
+- [Expo Docs](https://docs.expo.dev/)
+- [Appwrite Docs](https://appwrite.io/docs)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
