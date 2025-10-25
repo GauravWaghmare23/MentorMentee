@@ -1,5 +1,10 @@
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
 
 export default function CollegeLayout() {
-    return <Stack />
+    return (
+        <Tabs>
+            <Tabs.Screen name="CollegeHome" options={{ headerShown: false }} />
+            <Tabs.Screen name="CollegeProfile" options={{ headerShown: false }} />
+        </Tabs>
+    )
 }

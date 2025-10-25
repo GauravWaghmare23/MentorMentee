@@ -1,4 +1,4 @@
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ const ROLES = ['Student', 'Teacher', 'College'];
 
 const SignUp = () => {
     const navigate = useNavigation();
+    const router = useRouter();
     const { signup } = useAuth();
     // State variables to hold the form data
     const [name, setName] = useState('');
@@ -26,6 +27,7 @@ const SignUp = () => {
         setLoading(true);
         try {
             await signup(email, password, role.toLowerCase(), name);
+            router.replace(`${role.toLowerCase()}/${role.toLowerCase()}Home`);
         } catch (error) {
             Alert.alert('Sign Up Failed', error.message || 'An error occurred during sign up');
         } finally {

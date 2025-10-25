@@ -1,33 +1,32 @@
-import { useNavigation } from 'expo-router';
+import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function AuthGate() {
-    const navigate = useNavigation();
     const { user, role, loading } = useAuth();
 
     useEffect(() => {
         if (!loading) {
             if (!user) {
-                navigate.push('LogIn');
+                router.replace('LogIn');
                 return;
             }
 
             switch (role) {
                 case 'college':
-                    navigate.push('(college)/CollegeHome');
+                    router.replace('(college)/CollegeHome');
                     break;
                 case 'teacher':
-                    navigate.push('(teacher)/TeacherHome');
+                    router.replace('(teacher)/TeacherHome');
                     break;
                 case 'student':
-                    navigate.push('(student)/StudentHome');
+                    router.replace('(student)/StudentHome');
                     break;
                 default:
-                    navigate.push("LogIn")
+                    router.replace("LogIn")
             }
         }
-    }, [user, role, loading, navigate]);
+    }, [user, role, loading]);
 
     return null;
 }

@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     const fetchUser = async () => {
         try {
             const session = await account.get();
-            const prefs = await account.getPreferences();
+            const prefs = await account.getPrefs();
             setUser(session);
             setRole(prefs.role);
             setName(prefs.name);
@@ -29,12 +29,13 @@ export const AuthProvider = ({ children }) => {
     const signup = async (email, password, role, name) => {
         const userId = ID.unique();
         await account.create(userId, email, password, name);
-        await account.updatePreferences({ role, name });
-        await login(email, password);
+        await account.createEmailPasswordSession(email, password);
+        await account.updatePrefs({ role, name });
+        await fetchUser();
     };
 
     const login = async (email, password) => {
-        await account.createEmailSession(email, password);
+        await account.createEmailPasswordSession(email, password);
         await fetchUser();
         router.replace('/');
     };
